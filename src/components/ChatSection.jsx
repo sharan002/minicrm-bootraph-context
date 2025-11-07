@@ -41,9 +41,19 @@ const ChatSection = () => {
             >
               <i className="fas fa-arrow-left"></i>
             </button>
-            <div className={`rounded-circle p-2 me-3 ${selectedUser.respondedAfterFollowUp ? 'bg-success' : 'bg-primary'}`}>
-              <i className={`${getLeadSourceIcon(selectedUser.leadfrom)} text-white`}></i>
-            </div>
+<div
+  className={`rounded-circle p-2 me-3 d-flex align-items-center justify-content-center`}
+  style={{
+    width: "40px", // adjust as needed
+    height: "40px",
+    backgroundColor: "#f0f0f0", // optional for visibility
+  }}
+>
+  <i
+    className={`${getLeadSourceIcon(selectedUser.leadfrom)}`}
+    style={{ fontSize: "20px" }} // scales the icon
+  ></i>
+</div>
             <div>
               <h5 className="fw-semibold mb-1 text-dark">{selectedUser.userName}</h5>
               <div className="d-flex flex-wrap text-muted small">

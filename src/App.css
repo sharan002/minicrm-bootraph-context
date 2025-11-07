@@ -1,42 +1,244 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+/* Global design tokens */
+:root {
+  --bg-1: #f5f7fb;
+  --surface: #ffffff;
+  --muted: #6c757d;
+  --primary-500: #4f46e5; /* indigo-600 */
+  --primary-600: #4338ca;
+  --accent: #06b6d4; /* cyan-500 */
+  --success: #16a34a;
+  --danger: #e11d48;
+  --radius: 10px;
+  --card-shadow: 0 6px 18px rgba(33, 37, 41, 0.06);
+}
+
+/* Base resets and typography */
+html, body, #root {
+  height: 100%;
+}
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: linear-gradient(180deg, var(--bg-1) 0%, #eef2ff 100%);
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth container and card style used across the app */
+.container-fluid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.bg-white {
+  background-color: var(--surface) !important;
+  border-radius: var(--radius);
+}
+
+.shadow-sm {
+  box-shadow: var(--card-shadow) !important;
+}
+
+.card, .app-card {
+  background: var(--surface);
+  border: 1px solid rgba(15,23,42,0.04);
+  border-radius: calc(var(--radius) - 2px);
+  box-shadow: var(--card-shadow);
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+  border: none;
+  box-shadow: 0 6px 14px rgba(67,56,202,0.12);
+  border-radius: 8px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+}
+.btn-outline-secondary {
+  border-radius: 8px;
+}
+.btn-outline-primary {
+  border-radius: 8px;
+}
+
+/* Inputs */
+.form-control:focus {
+  box-shadow: 0 4px 12px rgba(79,70,229,0.12);
+  border-color: var(--primary-600);
+}
+
+/* Dropdown / panels */
+.dropdown-menu {
+  border-radius: 10px;
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 18px 40px rgba(2,6,23,0.08);
+}
+
+/* Sidebar improvements */
+.border-end {
+  border-right: 1px solid rgba(15,23,42,0.04) !important;
+}
+.sidebar-content .border-bottom {
+  border-color: rgba(15,23,42,0.03) !important;
+}
+.sidebar-content::-webkit-scrollbar { width: 8px; }
+.sidebar-content::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.08); border-radius: 8px; }
+
+/* Badges */
+.badge {
+  border-radius: 10px;
+  padding: 0.35em 0.5em;
+  font-size: 0.72rem;
+}
+
+/* Small utility polish */
+.text-muted { color: var(--muted) !important; }
+.fw-semibold { font-weight: 600 !important; }
+.h4 { letter-spacing: -0.02em; }
+
+/* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  50% { transform: scale(1.02); }
 }
 
 @keyframes slideIn {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from { transform: translateX(8px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.fade-in { animation: fadeIn 0.3s ease-out; }
-.pulse { animation: pulse 2s infinite; }
-.slide-in { animation: slideIn 0.3s ease-out; }
+.fade-in { animation: fadeIn 0.28s ease-out; }
+.pulse { animation: pulse 2.4s infinite; }
+.slide-in { animation: slideIn 0.28s ease-out; }
 
 .sidebar-item:hover {
-  background-color: #f8f9fa !important;
-  transition: background-color 0.2s;
+  background-color: rgba(79,70,229,0.04) !important;
+  transition: background-color 0.18s, transform 0.12s;
 }
 
-.message-animation {
-  animation: fadeIn 0.3s ease-out;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
+.message-animation { animation: fadeIn 0.28s ease-out; }
+.cursor-pointer { cursor: pointer; }
 
 /* Responsive improvements */
 @media (max-width: 768px) {
-  .mobile-hidden {
-    display: none !important;
-  }
-  
-  .mobile-full {
-    width: 100% !important;
-  }
+  .mobile-hidden { display: none !important; }
+  .mobile-full { width: 100% !important; }
 }
+
+/* Extra small tweaks for header and elements */
+header.bg-white.shadow-sm.border-bottom {
+  padding: 0.6rem 0.5rem;
+}
+header .bg-primary {
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600)) !important;
+}
+header .h4 { margin-left: 6px; }
+
+/* make dropdown notification items feel lighter */
+.dropdown-item { padding-left: 0.9rem; padding-right: 0.9rem; }
+
+/* small card for chat area */
+.chat-card { height: 100%; display: flex; flex-direction: column; }
+
+/* -------- Chat & Header polish -------- */
+/* Compact header tabs */
+header .btn.btn-sm.mx-1 {
+  padding: 0.28rem 0.5rem;
+  font-size: 0.78rem;
+  border-radius: 8px;
+}
+header .btn.btn-sm.mx-1 .badge,
+header .btn.btn-sm .badge {
+  transform: translateY(-1px);
+  padding: 0.18rem 0.45rem;
+  font-size: 0.68rem;
+}
+
+/* Fix avatar / lead icon so it's a perfect circle */
+.p-3.bg-white.border-bottom .rounded-circle.me-3,
+.p-3.bg-white .rounded-circle.me-3 {
+  width: 48px;
+  height: 48px;
+  padding: 0; /* control size via width/height */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50% !important;
+}
+.p-3.bg-white.border-bottom .rounded-circle.me-3 i,
+.p-3.bg-white .rounded-circle.me-3 i {
+  font-size: 18px;
+}
+
+/* Chat message bubbles (incoming/outgoing) */
+.flex-grow-1.p-4 .d-flex.justify-content-start > div,
+.flex-grow-1.p-4 .d-flex.justify-content-end > div {
+  border-radius: 14px;
+  box-shadow: 0 8px 26px rgba(15,23,42,0.06);
+  padding: 0.82rem 0.88rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.flex-grow-1.p-4 .d-flex.justify-content-end > div {
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+  color: #fff;
+}
+.flex-grow-1.p-4 .d-flex.justify-content-start > div {
+  background: #fff;
+  border: 1px solid rgba(15,23,42,0.04);
+}
+.flex-grow-1.p-4 .d-flex > div { animation: fadeIn 0.22s ease-out; }
+
+/* Small hover lift on bubbles */
+.flex-grow-1.p-4 .d-flex > div:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(15,23,42,0.08); }
+
+/* Empty state / icons */
+.d-flex.flex-column.align-items-center.justify-content-center.text-muted i.fas { font-size: 42px; color: var(--muted); }
+
+/* Chat input & send button modern look */
+.p-3.bg-white.border-top .input-group {
+  gap: 0.5rem;
+}
+.p-3.bg-white.border-top .form-control {
+  border-radius: 999px 14px 14px 999px;
+  border: 1px solid rgba(15,23,42,0.06);
+}
+.p-3.bg-white.border-top .btn.btn-primary {
+  border-radius: 12px;
+  padding: 0.48rem 1rem;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+  border: none;
+  box-shadow: 0 8px 26px rgba(67,56,202,0.12);
+}
+.p-3.bg-white.border-top .btn.btn-primary:hover { transform: translateY(-2px); }
+
+/* Make small buttons a bit more modern */
+.btn-outline-secondary.btn-sm, .btn-outline-danger.btn-sm, .btn-outline-primary.btn-sm {
+  border-radius: 8px;
+  padding: 0.28rem 0.55rem;
+}
+
+/* scrollbar tweak for chat area */
+.flex-grow-1.p-4::-webkit-scrollbar { height: 8px; width: 8px; }
+.flex-grow-1.p-4::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.06); border-radius: 8px; }
+
+@media (max-width: 768px) {
+  header .btn.btn-sm.mx-1 { padding: 0.22rem 0.45rem; font-size: 0.74rem; }
+  .p-3.bg-white.border-bottom .rounded-circle.me-3 { width: 40px; height: 40px; }
+  .flex-grow-1.p-4 .d-flex.justify-content-start > div,
+  .flex-grow-1.p-4 .d-flex.justify-content-end > div { max-width: 86%; }
+}
+

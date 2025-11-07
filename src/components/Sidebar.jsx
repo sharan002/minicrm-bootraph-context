@@ -89,16 +89,27 @@ const Sidebar = () => {
             >
               <div className="d-flex justify-content-between align-items-start">
                 <div className="d-flex align-items-start flex-grow-1">
-                  <div
-                    className={`d-flex align-items-center justify-content-center rounded-circle me-3 ${user.respondedAfterFollowUp ? "bg-warning" : "bg-primary"}`}
-                    style={{width: '40px', height: '40px'}}
-                  >
-                    {user.respondedAfterFollowUp ? (
-                      <i className="fas fa-fire text-white"></i>
-                    ) : (
-                      <i className={`${getLeadSourceIcon(user.leadfrom)} text-white`}></i>
-                    )}
-                  </div>
+<div
+  className={`d-flex align-items-center justify-content-center rounded-circle me-3 ${
+    user.respondedAfterFollowUp ? "bg-danger-subtle" : "bg-info-subtle"
+  }`}
+  style={{
+    width: "40px",
+    height: "40px",
+  }}
+>
+  {user.respondedAfterFollowUp ? (
+    <i
+      className="fas fa-fire text-danger"
+      style={{ fontSize: "22px", lineHeight: "1" }}
+    ></i>
+  ) : (
+    <i
+      className={`${getLeadSourceIcon(user.leadfrom)} text-info`}
+      style={{ fontSize: "22px", lineHeight: "1" }}
+    ></i>
+  )}
+</div>
                   <div className="flex-grow-1" style={{minWidth: 0}}>
                     <div className="d-flex justify-content-between align-items-start">
                       <h6 className="fw-semibold mb-1 text-dark text-truncate">

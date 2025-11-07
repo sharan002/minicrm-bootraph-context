@@ -7,7 +7,9 @@ const AddLeadModal = () => {
     setShowModal,
     formData,
     setFormData,
-    handleAddUser
+    handleAddUser,
+    errorMessage,
+    setErrorMessage
   } = useApp();
 
   if (!showModal) return null;
@@ -16,11 +18,10 @@ const AddLeadModal = () => {
     { key: "userName", label: "Full Name", placeholder: "Enter full name" },
     { key: "userNumber", label: "Phone Number", placeholder: "Enter phone number" },
     { key: "course", label: "Course", placeholder: "Enter course" },
-    { key: "city", label: "City", placeholder: "Enter city" }
   ];
 
   return (
-    <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
+    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
@@ -28,9 +29,13 @@ const AddLeadModal = () => {
             <button
               type="button"
               className="btn-close"
-              onClick={() => setShowModal(false)}
+              onClick={() => {
+                setShowModal(false);
+                setErrorMessage(""); // clear error when closing
+              }}
             ></button>
           </div>
+
           <div className="modal-body">
             <div className="row g-3">
               {fields.map((field) => (
@@ -48,12 +53,23 @@ const AddLeadModal = () => {
                 </div>
               ))}
             </div>
+
+            {/* ✅ Error message display */}
+            {errorMessage && (
+              <div className="alert alert-danger mt-3 py-2">
+                {errorMessage}
+              </div>
+            )}
           </div>
+
           <div className="modal-footer">
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => setShowModal(false)}
+              onClick={() => {
+                setShowModal(false);
+                setErrorMessage("");
+              }}
             >
               Cancel
             </button>

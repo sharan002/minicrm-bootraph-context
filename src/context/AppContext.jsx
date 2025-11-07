@@ -34,6 +34,7 @@ export const AppProvider = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileSidebar, setShowMobileSidebar] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const messagesEndRef = useRef(null);
   const notificationRef = useRef(null);
@@ -193,29 +194,38 @@ export const AppProvider = ({ children }) => {
   };
 
   const handleAddUser = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          leadfrom: "Manual Entry",
-        }),
-      });
+  try {
+    setErrorMessage(""); // clear any previous error
 
-      if (res.ok) {
-        setShowModal(false);
-        setFormData({
-          userName: "",
-          userNumber: "",
-          course: "",
-          city: "",
-        });
-      }
-    } catch (err) {
-      console.error("Error adding user:", err);
+    const res = await fetch("http://localhost:3000/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+        leadfrom: "Manual Entry",
+      }),
+    });
+
+    const data = await res.json().catch(() => ({})); // handle JSON parse errors safely
+
+    if (res.ok) {
+      // ✅ Success
+      setShowModal(false);
+      setFormData({
+        userName: "",
+        userNumber: "",
+        course: "",
+        city: "",
+      });
+    } else {
+      // ❌ Failure
+      setErrorMessage(data?.message || "Failed to add user. Please try again.");
     }
-  };
+  } catch (err) {
+    console.error("Error adding user:", err);
+    setErrorMessage("Server error. Please try again later.");
+  }
+};
 
   const markAsRead = (leadId) => {
     setUnreadLeads(prev => prev.filter(id => id !== leadId));
@@ -319,6 +329,8 @@ export const AppProvider = ({ children }) => {
     setShowMobileSidebar,
     fetchUsers,
     handleAddUser,
+    errorMessage,
+    setErrorMessage,
     markAsRead,
     markAllAsRead,
     handleDeleteLead,
