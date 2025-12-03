@@ -42,10 +42,10 @@ export const AppProvider = ({ children }) => {
   // Fetch users with useEffect
   const fetchUsers = async () => {
     try {
-      const res = await fetch("https://nonveracious-conveniently-jacques.ngrok-free.dev/users", {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
+      const res = await fetch("http://localhost:3000/users", {
+        // headers: {
+        //   "ngrok-skip-browser-warning": "true",
+        // },
       });
       const data = await res.json();
       setUsers(data);
@@ -75,11 +75,11 @@ export const AppProvider = ({ children }) => {
             }
             return prev;
           });
-          
+
           if (notificationSound) {
             playNotificationSound();
           }
-          
+
           if (browserNotifications && data.user.userName) {
             showBrowserNotification("New Lead Received", {
               body: `${data.user.userName} - ${data.user.course || "User yet to start convo"}`,
@@ -98,14 +98,14 @@ export const AppProvider = ({ children }) => {
 
         } else if (data.type === "new_message") {
           const { userNumber, conversation, userName } = data;
-          
+
           const normalizedConversation = {
             ...conversation,
-            timestamp: conversation.timestamp && !isNaN(new Date(conversation.timestamp).getTime()) 
-              ? conversation.timestamp 
+            timestamp: conversation.timestamp && !isNaN(new Date(conversation.timestamp).getTime())
+              ? conversation.timestamp
               : new Date().toISOString()
           };
-          
+
           setUsers((prevUsers) => {
             const updatedUsers = prevUsers.map((u) => {
               if (u.userNumber === userNumber) {
@@ -113,7 +113,7 @@ export const AppProvider = ({ children }) => {
                   ...(u.conversations || []),
                   normalizedConversation
                 ];
-                
+
                 return {
                   ...u,
                   conversations: updatedConversations,
@@ -122,16 +122,16 @@ export const AppProvider = ({ children }) => {
               }
               return u;
             });
-            
+
             return updatedUsers.sort(
               (a, b) => new Date(b.lastInteracted) - new Date(a.lastInteracted)
             );
           });
-          
+
           if (selectedUser && selectedUser.userNumber === userNumber) {
             setSelectedUser(prev => {
               if (!prev) return prev;
-              
+
               return {
                 ...prev,
                 conversations: [
@@ -176,16 +176,16 @@ export const AppProvider = ({ children }) => {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
+
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
+
       oscillator.frequency.value = 800;
       oscillator.type = 'sine';
-      
+
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-      
+
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.5);
     } catch (error) {
@@ -194,38 +194,38 @@ export const AppProvider = ({ children }) => {
   };
 
   const handleAddUser = async () => {
-  try {
-    setErrorMessage(""); // clear any previous error
+    try {
+      setErrorMessage(""); // clear any previous error
 
-    const res = await fetch("http://localhost:3000/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...formData,
-        leadfrom: "Manual Entry",
-      }),
-    });
-
-    const data = await res.json().catch(() => ({})); // handle JSON parse errors safely
-
-    if (res.ok) {
-      // ✅ Success
-      setShowModal(false);
-      setFormData({
-        userName: "",
-        userNumber: "",
-        course: "",
-        city: "",
+      const res = await fetch("http://localhost:3000/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          leadfrom: "Manual Entry",
+        }),
       });
-    } else {
-      // ❌ Failure
-      setErrorMessage(data?.message || "Failed to add user. Please try again.");
+
+      const data = await res.json().catch(() => ({})); // handle JSON parse errors safely
+
+      if (res.ok) {
+        // ✅ Success
+        setShowModal(false);
+        setFormData({
+          userName: "",
+          userNumber: "",
+          course: "",
+          city: "",
+        });
+      } else {
+        // ❌ Failure
+        setErrorMessage(data?.message || "Failed to add user. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error adding user:", err);
+      setErrorMessage("Server error. Please try again later.");
     }
-  } catch (err) {
-    console.error("Error adding user:", err);
-    setErrorMessage("Server error. Please try again later.");
-  }
-};
+  };
 
   const markAsRead = (leadId) => {
     setUnreadLeads(prev => prev.filter(id => id !== leadId));
@@ -286,7 +286,7 @@ export const AppProvider = ({ children }) => {
         setShowNotifications(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -295,6 +295,7 @@ export const AppProvider = ({ children }) => {
 
   const value = {
     users,
+    setUsers,
     activeTab,
     selectedUser,
     showModal,
