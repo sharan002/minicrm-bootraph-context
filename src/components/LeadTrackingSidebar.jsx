@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 
 const LeadTrackingSidebar = () => {
-    const { selectedUser, setSelectedUser, setUsers } = useApp();
+    const { selectedUser, setSelectedUser, setUsers , setAssignee ,assignee , assigneeList, setAssigneeList } = useApp();
     const [remarks, setRemarks] = useState([]);
     const [newRemark, setNewRemark] = useState("");
     const [reminderDate, setReminderDate] = useState("");
     const [status, setStatus] = useState("contacted");
-    const [assignee, setAssignee] = useState("user1");
     const [isSaving, setIsSaving] = useState(false);
 
     // Load initial data when selectedUser changes
@@ -16,7 +15,7 @@ const LeadTrackingSidebar = () => {
             setRemarks(selectedUser.remarks || []);
             setReminderDate(selectedUser.reminder ? new Date(selectedUser.reminder).toISOString().slice(0, 16) : "");
             setStatus(selectedUser.status || "contacted");
-            setAssignee(selectedUser.assignedto || "user1");
+            setAssignee(selectedUser.assignedto || "");
         }
     }, [selectedUser]);
 
@@ -173,14 +172,19 @@ const LeadTrackingSidebar = () => {
                 {/* Assignee */}
                 <div className="mb-4">
                     <label className="form-label fw-semibold">Assignee</label>
-                    <select
-                        className="form-select"
-                        value={assignee}
-                        onChange={(e) => setAssignee(e.target.value)}
-                    >
-                        <option value="user1">User 1</option>
-                        <option value="user2">User 2</option>
-                    </select>
+<select
+    className="form-select"
+    value={assignee}
+    onChange={(e) => setAssignee(e.target.value)}
+>
+    <option value="">-- Select User --</option>
+
+    {assigneeList.map((u, i) => (
+        <option key={i} value={u.userNumber}>
+            {u.useremail}
+        </option>
+    ))}
+</select>
                 </div>
 
                 {/* Save Button */}

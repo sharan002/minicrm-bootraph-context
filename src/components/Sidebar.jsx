@@ -17,7 +17,7 @@ const Sidebar = () => {
     startDate,
     endDate,
     searchQuery,
-    sortBy
+    sortBy,setAssignee ,assignee , assigneeList, setAssigneeList
   } = useApp();
 
   const filteredUsers = users.filter((user) => {
@@ -147,6 +147,34 @@ const Sidebar = () => {
                    user.conversations[user.conversations.length - 1].botReply}
                 </div>
               )}
+              {/* Assignee Dropdown */}
+{/* <div className="mt-2 ps-5">
+  <select
+    className="form-select form-select-sm"
+    value={user.assignedTo || ""}
+    onChange={(e) => {
+      // update selected user's assignee locally
+      const updated = users.map((u) =>
+        u.userNumber === user.userNumber
+          ? { ...u, assignedTo: e.target.value }
+          : u
+      );
+      setUsers(updated);
+
+      // Optional: Save globally
+      setAssignee(e.target.value);
+    }}
+  >
+    <option value="">-- Assign User --</option>
+
+    {assigneeList.map((staff) => (
+      <option key={staff.userNumber} value={staff.userNumber}>
+        {staff.useremail}
+      </option>
+    ))}
+  </select>
+</div> */}
+
             </div>
           ))
         ) : (
