@@ -6,8 +6,9 @@ import Dashboard from './components/Dashboard';
 // simple auth guard
 const PrivateRoute = ({ children }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn');
-  return isLoggedIn ? children : <Navigate to="/" />;
+  return isLoggedIn ? children : <Navigate to="/" replace />;
 };
+
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

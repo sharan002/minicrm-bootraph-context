@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, use } from 'react';
 import { showBrowserNotification, getLeadSourceIcon } from '../utils/notificationUtils';
 import { formatMessageTime, groupMessagesByDate, formatDateLabel } from '../utils/dateUtils';
-
+import axios from "axios";
 const AppContext = createContext();
 
 export const useApp = () => {
@@ -37,7 +37,7 @@ const [assigneeList, setAssigneeList] = useState([]);
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileSidebar, setShowMobileSidebar] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-
+const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || null);
   const messagesEndRef = useRef(null);
   const notificationRef = useRef(null);
 
@@ -278,67 +278,96 @@ const [assigneeList, setAssigneeList] = useState([]);
 
 const HandleLead = async (username, password, navigate) => {
   try {
-    const res = await fetch("http://localhost:3000/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    const res = await axios.post(
+      "http://localhost:3000/login",
+      { username, password },   // ✅ FIXED
+      { withCredentials: true }
+    );
 
-    const data = await res.json();
-
-    if (!data.success) {
+    if (!res.data.success) {
       alert("Invalid credentials");
       return;
     }
 
-    // Leads for dashboard
-    setUsers(data.leads);
+    const token = res.data.accessToken;
 
-    // 🔥 Correct: set staff list here
-    setAssigneeList(data.staffs);
+    setAccessToken(token);
+    localStorage.setItem("token", token);
+    localStorage.setItem("username", res.data.user.username);
+    localStorage.setItem("userNumber", res.data.user.userNumber);
 
-    // 🔥 Reset selected assignee
-    setAssignee("");
-
-    console.log("Staffs loaded:", data.staffs);
-
-    // Save login state
     localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("leads", JSON.stringify(data.leads));
 
     navigate("/dashboard");
 
-  } catch (error) {
-    alert("Something went wrong");
-    console.log(error);
+  } catch (err) {
+    console.error("Login error:", err);
+  }
+};
+  // ------------------------------------------------------
+  // 📌 FETCH DASHBOARD DATA
+  // ------------------------------------------------------
+const fetchDashboard = async () => {
+  const tokenToUse = localStorage.getItem("token");
+
+  if (!tokenToUse) {
+    navigate("/");
+    return;
+  }
+
+  const storedUsername = localStorage.getItem("username");
+
+  if (!storedUsername) {
+    navigate("/");
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      "http://localhost:3000/dashboard",
+      { username: storedUsername },
+      {
+        headers: {
+          Authorization: `Bearer ${tokenToUse}`,  // ✅ FIXED
+        },
+      }
+    );
+
+    if (res.data.leads) {
+      setUsers(res.data.leads);   // ✅ FIXED
+    }
+
+    if (res.data.staffs) {
+      setAssigneeList(res.data.staffs);
+    }
+
+  } catch (err) {
+    console.log("Dashboard fetch failed:", err);
+    navigate("/");
   }
 };
 
 
-// const GetStaffs= async () =>{
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token && !accessToken) {
+    setAccessToken(token);   // ✅ restore on refresh
+  }
+}, []);
 
-//     try {
-//     const res = await fetch("http://localhost:3000/getstaffs", {
-//       method: "GET",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ username, password }),
-//     });
 
-//     const data = await res.json();
-
-//     if (!data.success) {
-//       alert("Invalid credentials");
-//       return;
-//     }
-
-    
-//   } catch (error) {
-//     alert("Something went wrong");
-//     console.log(error);
-//   }
-        
-// }
+  // ------------------------------------------------------
+  // 🚪 LOGOUT
+  // ------------------------------------------------------
+const logout = () => {
+  setUsers([]);
+  setAccessToken(null);
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  localStorage.removeItem("userNumber");
+  localStorage.removeItem("isLoggedIn");
+  navigate("/");
+};
 
 
 
@@ -426,6 +455,9 @@ const HandleLead = async (username, password, navigate) => {
     setAssignee,
     assigneeList,      // array of users
     setAssigneeList,
+    accessToken,
+    setAccessToken,
+    fetchDashboard
   };
 
   return (

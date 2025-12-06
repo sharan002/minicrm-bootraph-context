@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useApp } from '../context/AppContext';
 
 import Header from './Header';
 import Filters from './Filters';
@@ -6,10 +7,18 @@ import Sidebar from './Sidebar';
 import ChatSection from './ChatSection';
 import AddLeadModal from './AddLeadModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../App.css';
 
 function Dashboard() {
+  const { users, fetchDashboard, accessToken } = useApp();
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+  
+ if (!users || users.length === 0) {
+  return <h3 className="text-center mt-5">Loading Dashboard...</h3>;
+}
+
   return (
     <div className="d-flex flex-column vh-100">
       <Header />

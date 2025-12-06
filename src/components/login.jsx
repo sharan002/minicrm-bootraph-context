@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
 function Login() {
-  const [username, setUsername] = useState('');
+  const [usernum, setUsernum] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const { HandleLead } = useApp();
@@ -12,7 +12,7 @@ function Login() {
     e.preventDefault();
 
     // Pass username + password + navigate to context
-    HandleLead(username, password, navigate);
+    HandleLead(usernum, password, navigate);
   };
 
   return (
@@ -26,8 +26,8 @@ function Login() {
             <input
               type="text"
               className="form-control"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={usernum}
+              onChange={(e) => setUsernum(e.target.value)}  // ✅ FIXED
               required
             />
           </div>
