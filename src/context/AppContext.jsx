@@ -18,7 +18,7 @@ export const AppProvider = ({ children }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [assignee, setAssignee] = useState("");          // selected value
-const [assigneeList, setAssigneeList] = useState([]);
+  const [assigneeList, setAssigneeList] = useState([]);
   const [formData, setFormData] = useState({
     userName: "",
     userNumber: "",
@@ -27,6 +27,23 @@ const [assigneeList, setAssigneeList] = useState([]);
   });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  // New Filters
+  const [courseFilter, setCourseFilter] = useState("");
+  const [leadSourceFilter, setLeadSourceFilter] = useState("");
+  const [pipelineFilter, setPipelineFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [programTypeFilter, setProgramTypeFilter] = useState("");
+  const [professionFilter, setProfessionFilter] = useState("");
+  const [assignedToFilter, setAssignedToFilter] = useState("");
+  // Note: dateCreatedFilter is essentially startDate/endDate, but user asked for a single date input in their snippet.
+  // Existing startDate/endDate handles ranges, which is better, but I'll add separate specific date filter if needed.
+  // User snippet had <input type="date" id="datecreatedFilter">. 
+  // I'll stick to using the existing startDate/endDate which is more powerful, 
+  // OR I can add a specific "filter by exact date" if strictly requested. 
+  // Given existing code uses startDate/endDate, I will map the new date filter to startDate for now 
+  // or better, just add a distinct one to match the snippet perfectly if they want exact match.
+  // Let's add it for exact matching as per snippet logic.
+  const [dateCreatedFilter, setDateCreatedFilter] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState(null);
   const [unreadLeads, setUnreadLeads] = useState([]);
@@ -37,7 +54,7 @@ const [assigneeList, setAssigneeList] = useState([]);
   const [sortBy, setSortBy] = useState("newest");
   const [showMobileSidebar, setShowMobileSidebar] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || null);
+  const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || null);
   const messagesEndRef = useRef(null);
   const notificationRef = useRef(null);
 
@@ -62,17 +79,17 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
 
 
   useEffect(() => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-  // Only restore data if logged in
-  if (isLoggedIn === "true") {
-    const savedLeads = JSON.parse(localStorage.getItem("leads")) || [];
-    const savedUser = JSON.parse(localStorage.getItem("user")) || null;
+    // Only restore data if logged in
+    if (isLoggedIn === "true") {
+      const savedLeads = JSON.parse(localStorage.getItem("leads")) || [];
+      const savedUser = JSON.parse(localStorage.getItem("user")) || null;
 
-    setUsers(savedLeads);
-    console.log("📌 Restored leads from localStorage:", savedLeads);
-  }
-}, []);
+      setUsers(savedLeads);
+      console.log("📌 Restored leads from localStorage:", savedLeads);
+    }
+  }, []);
 
   // WebSocket connection
   useEffect(() => {
@@ -91,11 +108,11 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
             }
             return prev;
           });
-          
+
           if (notificationSound) {
             playNotificationSound();
           }
-          
+
           if (browserNotifications && data.user.userName) {
             showBrowserNotification("New Lead Received", {
               body: `${data.user.userName} - ${data.user.course || "User yet to start convo"}`,
@@ -114,14 +131,14 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
 
         } else if (data.type === "new_message") {
           const { userNumber, conversation, userName } = data;
-          
+
           const normalizedConversation = {
             ...conversation,
-            timestamp: conversation.timestamp && !isNaN(new Date(conversation.timestamp).getTime()) 
-              ? conversation.timestamp 
+            timestamp: conversation.timestamp && !isNaN(new Date(conversation.timestamp).getTime())
+              ? conversation.timestamp
               : new Date().toISOString()
           };
-          
+
           setUsers((prevUsers) => {
             const updatedUsers = prevUsers.map((u) => {
               if (u.userNumber === userNumber) {
@@ -129,7 +146,7 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
                   ...(u.conversations || []),
                   normalizedConversation
                 ];
-                
+
                 return {
                   ...u,
                   conversations: updatedConversations,
@@ -138,16 +155,16 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
               }
               return u;
             });
-            
+
             return updatedUsers.sort(
               (a, b) => new Date(b.lastInteracted) - new Date(a.lastInteracted)
             );
           });
-          
+
           if (selectedUser && selectedUser.userNumber === userNumber) {
             setSelectedUser(prev => {
               if (!prev) return prev;
-              
+
               return {
                 ...prev,
                 conversations: [
@@ -192,16 +209,16 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
+
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
+
       oscillator.frequency.value = 800;
       oscillator.type = 'sine';
-      
+
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-      
+
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.5);
     } catch (error) {
@@ -209,39 +226,39 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
     }
   };
 
-const handleAddUser = async () => {
-  try {
-    setErrorMessage("");
-    const res = await fetch("http://localhost:3000/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...formData,
-        leadfrom: "Manual",
-      }),
-    });
-
-    const data = await res.json(); // ✅ parse ONCE
-
-    if (res.ok) {
-      setUsers(prevUsers => [...prevUsers, data.user]); // update list first
-
-      setFormData({
-        userName: "",
-        userNumber: "",
-        course: "",
-        city: "",
+  const handleAddUser = async () => {
+    try {
+      setErrorMessage("");
+      const res = await fetch("http://localhost:3000/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          leadfrom: "Manual",
+        }),
       });
 
-      setShowModal(false); // close modal
-    } else {
-      setErrorMessage(data?.message || "Failed to add user. Please try again.");
+      const data = await res.json(); // ✅ parse ONCE
+
+      if (res.ok) {
+        setUsers(prevUsers => [...prevUsers, data.user]); // update list first
+
+        setFormData({
+          userName: "",
+          userNumber: "",
+          course: "",
+          city: "",
+        });
+
+        setShowModal(false); // close modal
+      } else {
+        setErrorMessage(data?.message || "Failed to add user. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error adding user:", err);
+      setErrorMessage("Server error. Please try again later.");
     }
-  } catch (err) {
-    console.error("Error adding user:", err);
-    setErrorMessage("Server error. Please try again later.");
-  }
-};
+  };
 
   const markAsRead = (leadId) => {
     setUnreadLeads(prev => prev.filter(id => id !== leadId));
@@ -254,138 +271,138 @@ const handleAddUser = async () => {
 
 
   const handleDeleteLead = async () => {
-  if (!leadToDelete) return;
+    if (!leadToDelete) return;
 
-  try {
-    console.log("Deleting:", leadToDelete);
+    try {
+      console.log("Deleting:", leadToDelete);
 
-    const res = await fetch(
-      `http://localhost:3000/leads/${leadToDelete._id}`,
-      { method: "DELETE" }
-    );
+      const res = await fetch(
+        `http://localhost:3000/leads/${leadToDelete._id}`,
+        { method: "DELETE" }
+      );
 
-    if (!res.ok) {
-      alert("Error deleting user");
-      throw new Error("Failed to delete lead");
-    }
-
-    // ✅ Update UI immediately
-    setUsers(prev =>
-      prev.filter(u => u.userNumber !== leadToDelete.userNumber)
-    );
-
-    setUnreadLeads(prev =>
-      prev.filter(id => id !== leadToDelete._id)
-    );
-
-    if (selectedUser?.userNumber === leadToDelete.userNumber) {
-      setSelectedUser(null);
-      if (window.innerWidth < 768) {
-        setShowMobileSidebar(true);
+      if (!res.ok) {
+        alert("Error deleting user");
+        throw new Error("Failed to delete lead");
       }
+
+      // ✅ Update UI immediately
+      setUsers(prev =>
+        prev.filter(u => u.userNumber !== leadToDelete.userNumber)
+      );
+
+      setUnreadLeads(prev =>
+        prev.filter(id => id !== leadToDelete._id)
+      );
+
+      if (selectedUser?.userNumber === leadToDelete.userNumber) {
+        setSelectedUser(null);
+        if (window.innerWidth < 768) {
+          setShowMobileSidebar(true);
+        }
+      }
+
+    } catch (err) {
+      console.error("Error deleting lead:", err);
+    } finally {
+      setShowDeleteConfirm(false);
+      setLeadToDelete(null);
     }
+  };
 
-  } catch (err) {
-    console.error("Error deleting lead:", err);
-  } finally {
-    setShowDeleteConfirm(false);
-    setLeadToDelete(null);
-  }
-};
+  const HandleLead = async (username, password, navigate) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/login",
+        { username, password },   // ✅ FIXED
+        { withCredentials: true }
+      );
 
-const HandleLead = async (username, password, navigate) => {
-  try {
-    const res = await axios.post(
-      "http://localhost:3000/login",
-      { username, password },   // ✅ FIXED
-      { withCredentials: true }
-    );
+      if (!res.data.success) {
+        alert("Invalid credentials");
+        return;
+      }
 
-    if (!res.data.success) {
-      alert("Invalid credentials");
-      return;
+      const token = res.data.accessToken;
+
+      setAccessToken(token);
+      localStorage.setItem("token", token);
+      localStorage.setItem("username", res.data.user.username);
+      localStorage.setItem("userNumber", res.data.user.userNumber);
+
+      localStorage.setItem("isLoggedIn", "true");
+
+      navigate("/dashboard");
+
+    } catch (err) {
+      console.error("Login error:", err);
     }
-
-    const token = res.data.accessToken;
-
-    setAccessToken(token);
-    localStorage.setItem("token", token);
-    localStorage.setItem("username", res.data.user.username);
-    localStorage.setItem("userNumber", res.data.user.userNumber);
-
-    localStorage.setItem("isLoggedIn", "true");
-
-    navigate("/dashboard");
-
-  } catch (err) {
-    console.error("Login error:", err);
-  }
-};
+  };
   // ------------------------------------------------------
   // 📌 FETCH DASHBOARD DATA
   // ------------------------------------------------------
-const fetchDashboard = async () => {
-  const tokenToUse = localStorage.getItem("token");
+  const fetchDashboard = async () => {
+    const tokenToUse = localStorage.getItem("token");
 
-  if (!tokenToUse) {
-    navigate("/");
-    return;
-  }
+    if (!tokenToUse) {
+      navigate("/");
+      return;
+    }
 
-  const storedUsername = localStorage.getItem("username");
+    const storedUsername = localStorage.getItem("username");
 
-  if (!storedUsername) {
-    navigate("/");
-    return;
-  }
+    if (!storedUsername) {
+      navigate("/");
+      return;
+    }
 
-  try {
-    const res = await axios.post(
-      "http://localhost:3000/dashboard",
-      { username: storedUsername },
-      {
-        headers: {
-          Authorization: `Bearer ${tokenToUse}`,  // ✅ FIXED
-        },
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/dashboard",
+        { username: storedUsername },
+        {
+          headers: {
+            Authorization: `Bearer ${tokenToUse}`,  // ✅ FIXED
+          },
+        }
+      );
+
+      if (res.data.leads) {
+        setUsers(res.data.leads);
+        console.log(res.data.leads)// ✅ FIXED
       }
-    );
 
-    if (res.data.leads) {
-      setUsers(res.data.leads);
-      console.log(res.data.leads)// ✅ FIXED
+      if (res.data.staffs) {
+        setAssigneeList(res.data.staffs);
+      }
+
+    } catch (err) {
+      console.log("Dashboard fetch failed:", err);
+      navigate("/");
     }
+  };
 
-    if (res.data.staffs) {
-      setAssigneeList(res.data.staffs);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token && !accessToken) {
+      setAccessToken(token);   // ✅ restore on refresh
     }
-
-  } catch (err) {
-    console.log("Dashboard fetch failed:", err);
-    navigate("/");
-  }
-};
-
-
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (token && !accessToken) {
-    setAccessToken(token);   // ✅ restore on refresh
-  }
-}, []);
+  }, []);
 
 
   // ------------------------------------------------------
   // 🚪 LOGOUT
   // ------------------------------------------------------
-const logout = () => {
-  setUsers([]);
-  setAccessToken(null);
-  localStorage.removeItem("token");
-  localStorage.removeItem("username");
-  localStorage.removeItem("userNumber");
-  localStorage.removeItem("isLoggedIn");
-  navigate("/");
-};
+  const logout = () => {
+    setUsers([]);
+    setAccessToken(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userNumber");
+    localStorage.removeItem("isLoggedIn");
+    navigate("/");
+  };
 
 
 
@@ -418,7 +435,7 @@ const logout = () => {
         setShowNotifications(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -450,6 +467,14 @@ const logout = () => {
     setFormData,
     setStartDate,
     setEndDate,
+    courseFilter, setCourseFilter,
+    leadSourceFilter, setLeadSourceFilter,
+    pipelineFilter, setPipelineFilter,
+    statusFilter, setStatusFilter,
+    programTypeFilter, setProgramTypeFilter,
+    professionFilter, setProfessionFilter,
+    assignedToFilter, setAssignedToFilter,
+    dateCreatedFilter, setDateCreatedFilter,
     setShowDeleteConfirm,
     setLeadToDelete,
     setUnreadLeads,

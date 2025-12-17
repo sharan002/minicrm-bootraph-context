@@ -3,6 +3,11 @@ import { useApp } from '../context/AppContext';
 import { getLeadSourceIcon } from '../utils/notificationUtils';
 
 const Sidebar = () => {
+  /* 
+    Updating filter logic to include new specific filters.
+    activeTab still functions as a primary high-level filter.
+    Additional filters (dropdowns) act as AND conditions.
+  */
   const {
     users,
     activeTab,
@@ -14,17 +19,32 @@ const Sidebar = () => {
     markAsRead,
     showMobileSidebar,
     setShowMobileSidebar,
-    startDate,
-    endDate,
     searchQuery,
-    sortBy,setAssignee ,assignee , assigneeList, setAssigneeList
+    sortBy,
+    setAssignee,
+    assignee,
+    assigneeList,
+    setAssigneeList,
+    // New filters
+    courseFilter,
+    leadSourceFilter,
+    pipelineFilter,
+    statusFilter,
+    programTypeFilter,
+    professionFilter,
+    assignedToFilter,
+    dateCreatedFilter,
+    startDate, // keeping for backward compatibility if needed or legacy clean up
+    endDate     // keeping for backward compatibility if needed or legacy clean up
   } = useApp();
 
   const filteredUsers = users.filter((user) => {
+    // 1. Existing Active Tab Logic
     if (activeTab !== "all") {
       if (activeTab === "respondedAfterFollowUp") {
         if (!user.respondedAfterFollowUp) return false;
       } else if (user.respondedAfterFollowUp) {
+        // If viewing specific source tab, exclude those who responded? (Logic from prev version preserved)
         return false;
       } else if (
         user.leadfrom?.toLowerCase() !== activeTab.toLowerCase()
@@ -33,23 +53,54 @@ const Sidebar = () => {
       }
     }
 
-    if (startDate || endDate) {
-      const userDate = new Date(user.datecreated);
-      if (startDate && userDate < new Date(startDate)) return false;
-      if (endDate && userDate > new Date(endDate + "T23:59:59"))
-        return false;
-    }
-    
+    // 2. Search Query Logic
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      return (
+      const matchesSearch = (
         user.userName?.toLowerCase().includes(query) ||
         user.userNumber?.includes(query) ||
         user.course?.toLowerCase().includes(query) ||
         user.city?.toLowerCase().includes(query)
       );
+      if (!matchesSearch) return false;
     }
-    
+
+    // 3. New Detailed Filters
+    if (courseFilter && user.course !== courseFilter) return false;
+
+    if (leadSourceFilter && user.leadfrom !== leadSourceFilter) return false;
+
+    // pipeline: Data has "New" (Title Case), filter has "New".
+    if (pipelineFilter && user.pipeline !== pipelineFilter) return false;
+
+    // status: Data has "New", filter option "New". Data also has leadStatus. check both.
+    if (statusFilter) {
+      const uStatus = user.status || user.leadStatus;
+      if (uStatus !== statusFilter) return false;
+    }
+
+    // programType: Data has "8 hours" in `programType` (camelCase). My previous code used lowercase `programtype`.
+    if (programTypeFilter) {
+      const uProg = user.programType || user.programtype;
+      if (uProg !== programTypeFilter) return false;
+    }
+
+    // profession: Data has "Job seeker". Filter option "Job seeker".
+    if (professionFilter && user.profession !== professionFilter) return false;
+
+    // assignedTo: Data has "assignedto" (lowercase). Check both.
+    if (assignedToFilter) {
+      const uAssign = user.assignedTo || user.assignedto;
+      if (uAssign !== assignedToFilter) return false;
+    }
+
+    // Date Created Filter (Exact Date Match)
+    if (dateCreatedFilter) {
+      if (!user.datecreated) return false;
+      const userDate = new Date(user.datecreated).toISOString().split('T')[0];
+      if (userDate !== dateCreatedFilter) return false;
+    }
+
     return true;
   });
 
@@ -71,8 +122,8 @@ const Sidebar = () => {
           {sortedUsers.length} {sortedUsers.length === 1 ? 'Lead' : 'Leads'}
         </h6>
       </div>
-      
-      <div className="sidebar-content" style={{height: 'calc(100vh - 200px)', overflowY: 'auto'}}>
+
+      <div className="sidebar-content" style={{ height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
         {sortedUsers.length > 0 ? (
           sortedUsers.map((user) => (
             <div
@@ -85,32 +136,31 @@ const Sidebar = () => {
                 }
               }}
               className={`p-3 border-bottom cursor-pointer ${selectedUser?.userNumber === user.userNumber ? 'bg-light border-start border-primary border-3' : ''}`}
-              style={{cursor: 'pointer'}}
+              style={{ cursor: 'pointer' }}
             >
               <div className="d-flex justify-content-between align-items-start">
                 <div className="d-flex align-items-start flex-grow-1">
-<div
-  className={`d-flex align-items-center justify-content-center rounded-circle me-3 ${
-    user.respondedAfterFollowUp ? "bg-danger-subtle" : "bg-info-subtle"
-  }`}
-  style={{
-    width: "40px",
-    height: "40px",
-  }}
->
-  {user.respondedAfterFollowUp ? (
-    <i
-      className="fas fa-fire text-danger"
-      style={{ fontSize: "22px", lineHeight: "1" }}
-    ></i>
-  ) : (
-    <i
-      className={`${getLeadSourceIcon(user.leadfrom)} text-info`}
-      style={{ fontSize: "22px", lineHeight: "1" }}
-    ></i>
-  )}
-</div>
-                  <div className="flex-grow-1" style={{minWidth: 0}}>
+                  <div
+                    className={`d-flex align-items-center justify-content-center rounded-circle me-3 ${user.respondedAfterFollowUp ? "bg-danger-subtle" : "bg-info-subtle"
+                      }`}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                    }}
+                  >
+                    {user.respondedAfterFollowUp ? (
+                      <i
+                        className="fas fa-fire text-danger"
+                        style={{ fontSize: "22px", lineHeight: "1" }}
+                      ></i>
+                    ) : (
+                      <i
+                        className={`${getLeadSourceIcon(user.leadfrom)} text-info`}
+                        style={{ fontSize: "22px", lineHeight: "1" }}
+                      ></i>
+                    )}
+                  </div>
+                  <div className="flex-grow-1" style={{ minWidth: 0 }}>
                     <div className="d-flex justify-content-between align-items-start">
                       <h6 className="fw-semibold mb-1 text-dark text-truncate">
                         {user.userName}
@@ -140,15 +190,15 @@ const Sidebar = () => {
                   <i className="fas fa-trash-alt"></i>
                 </button>
               </div>
-              
+
               {user.conversations && user.conversations.length > 0 && (
                 <div className="mt-2 text-muted small text-truncate ps-5">
-                  {user.conversations[user.conversations.length - 1].userMsg || 
-                   user.conversations[user.conversations.length - 1].botReply}
+                  {user.conversations[user.conversations.length - 1].userMsg ||
+                    user.conversations[user.conversations.length - 1].botReply}
                 </div>
               )}
               {/* Assignee Dropdown */}
-{/* <div className="mt-2 ps-5">
+              {/* <div className="mt-2 ps-5">
   <select
     className="form-select form-select-sm"
     value={user.assignedTo || ""}
