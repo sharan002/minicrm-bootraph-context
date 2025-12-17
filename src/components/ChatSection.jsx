@@ -61,7 +61,10 @@ const ChatSection = () => {
                 <div className="d-flex flex-wrap text-muted small">
                   <span className="me-3">{selectedUser.course || "No course info"}</span>
                   <span className="me-3">{selectedUser.userNumber}</span>
-                  <span>{selectedUser.city || "No location"}</span>
+                  <span className="me-3">{selectedUser.location || "NA"}</span>
+                  <span className="me-3">{selectedUser.programType || "NA"}</span>
+                  <span className="me-3">{selectedUser.status || "NA"}</span>
+                   <span className="me-3">{selectedUser.profession || "NA"}</span>
                 </div>
               </div>
             </div>

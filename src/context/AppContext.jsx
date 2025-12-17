@@ -209,32 +209,32 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
     }
   };
 
-  const handleAddUser = async () => {
+const handleAddUser = async () => {
   try {
-    setErrorMessage(""); // clear any previous error
-
+    setErrorMessage("");
     const res = await fetch("http://localhost:3000/add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...formData,
-        leadfrom: "Manual Entry",
+        leadfrom: "Manual",
       }),
     });
 
-    const data = await res.json().catch(() => ({})); // handle JSON parse errors safely
+    const data = await res.json(); // ✅ parse ONCE
 
     if (res.ok) {
-      // ✅ Success
-      setShowModal(false);
+      setUsers(prevUsers => [...prevUsers, data.user]); // update list first
+
       setFormData({
         userName: "",
         userNumber: "",
         course: "",
         city: "",
       });
+
+      setShowModal(false); // close modal
     } else {
-      // ❌ Failure
       setErrorMessage(data?.message || "Failed to add user. Please try again.");
     }
   } catch (err) {
@@ -252,29 +252,46 @@ const [accessToken, setAccessToken] = useState(localStorage.getItem("token") || 
     setShowNotifications(false);
   };
 
+
   const handleDeleteLead = async () => {
-    if (!leadToDelete) return;
-    try {
-      await fetch(`http://localhost:3000/${leadToDelete.userNumber}`, {
-        method: "DELETE",
-      });
-      setUsers((prev) =>
-        prev.filter((u) => u.userNumber !== leadToDelete.userNumber)
-      );
-      setUnreadLeads(prev => prev.filter(id => id !== leadToDelete._id));
-      if (selectedUser?.userNumber === leadToDelete.userNumber) {
-        setSelectedUser(null);
-        if (window.innerWidth < 768) {
-          setShowMobileSidebar(true);
-        }
-      }
-    } catch (err) {
-      console.error("Error deleting lead:", err);
-    } finally {
-      setShowDeleteConfirm(false);
-      setLeadToDelete(null);
+  if (!leadToDelete) return;
+
+  try {
+    console.log("Deleting:", leadToDelete);
+
+    const res = await fetch(
+      `http://localhost:3000/leads/${leadToDelete._id}`,
+      { method: "DELETE" }
+    );
+
+    if (!res.ok) {
+      alert("Error deleting user");
+      throw new Error("Failed to delete lead");
     }
-  };
+
+    // ✅ Update UI immediately
+    setUsers(prev =>
+      prev.filter(u => u.userNumber !== leadToDelete.userNumber)
+    );
+
+    setUnreadLeads(prev =>
+      prev.filter(id => id !== leadToDelete._id)
+    );
+
+    if (selectedUser?.userNumber === leadToDelete.userNumber) {
+      setSelectedUser(null);
+      if (window.innerWidth < 768) {
+        setShowMobileSidebar(true);
+      }
+    }
+
+  } catch (err) {
+    console.error("Error deleting lead:", err);
+  } finally {
+    setShowDeleteConfirm(false);
+    setLeadToDelete(null);
+  }
+};
 
 const HandleLead = async (username, password, navigate) => {
   try {
@@ -334,7 +351,8 @@ const fetchDashboard = async () => {
     );
 
     if (res.data.leads) {
-      setUsers(res.data.leads);   // ✅ FIXED
+      setUsers(res.data.leads);
+      console.log(res.data.leads)// ✅ FIXED
     }
 
     if (res.data.staffs) {
