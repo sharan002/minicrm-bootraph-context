@@ -260,7 +260,7 @@ const LeadTrackingSidebar = () => {
                         >
                             <option value="">-- Select User --</option>
                             {assigneeList.map((u, i) => (
-                                <option key={i} value={u.userNumber}>{u.useremail}</option>
+                                <option key={i} value={u.userNumber}>{u.username}</option>
                             ))}
                         </select>
                     </div>

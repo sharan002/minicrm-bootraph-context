@@ -16,8 +16,8 @@ const Filters = () => {
 
   // Constants from user request (Updated to match backend data)
   const courses = [
-    "Full Stack Python with AI", "Full Stack Java with AI",
-    "Full Stack Developer MERN with AI", "Data Science",
+    "Python Fullstack with AI", "Java Fullstack with AI",
+    "MERN Stack with AI", "Data Science",
     "Data Analytics", "Digital Marketing"
   ];
 
@@ -74,8 +74,8 @@ const Filters = () => {
     });
     
     if (assignedToFilter) {
-      const assignee = assigneeList?.find(a => a.userNumber === assignedToFilter);
-      const displayValue = assignee ? assignee.useremail || assignee.userName : assignedToFilter;
+      const assignee = assigneeList?.find(a => a.username === assignedToFilter);
+      const displayValue = assignee ? assignee.username || assignee.username : assignedToFilter;
       filters.push({ 
         key: 'assignedToFilter', 
         label: 'Assigned To', 
@@ -269,14 +269,14 @@ const Filters = () => {
                 <option value="">Assigned To</option>
                 {assigneeList && assigneeList.length > 0 ? (
                   assigneeList.map(staff => (
-                    <option key={staff.userNumber || staff._id} value={staff.userNumber}>
-                      {staff.useremail || staff.userName}
+                    <option key={staff.username || staff._id} value={staff.username}>
+                      {staff.username || staff.username}
                     </option>
                   ))
                 ) : (
                   <>
-                    <option value="123">123</option>
-                    <option value="456">456</option>
+                    <option value="mohan">123</option>
+                    <option value="dinu">456</option>
                   </>
                 )}
               </select>

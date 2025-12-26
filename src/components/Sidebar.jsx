@@ -149,7 +149,7 @@ const Sidebar = () => {
   });
 
   return (
-    <div className={`${showMobileSidebar ? 'd-block' : 'd-none'} d-md-block h-100 bg-white border-end`}>
+    <div className={`${showMobileSidebar ? 'd-block' : 'd-none'} d-md-flex flex-column h-100 bg-white border-end`}>
       {/* Header with improved styling */}
       <div className="p-3 border-bottom bg-light bg-gradient">
         <div className="d-flex align-items-center justify-content-between">
@@ -166,13 +166,13 @@ const Sidebar = () => {
         </div>
       </div>
 
-      <div className="sidebar-content" style={{ height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+      <div className="sidebar-content flex-grow-1" style={{ overflowY: 'auto' }}>
         {sortedUsers.length > 0 ? (
           sortedUsers.map((user) => {
             const isSelected = selectedUser?._id === user._id;
             const isUnread = unreadLeads.includes(user._id);
             const hasConversations = user.conversations && user.conversations.length > 0;
-            
+
             return (
               <div
                 key={user._id || user.userNumber}
@@ -184,7 +184,7 @@ const Sidebar = () => {
                   }
                 }}
                 className={`p-3 border-bottom cursor-pointer transition-all ${isSelected ? 'bg-primary bg-opacity-10 border-start border-primary border-3' : ''} ${isUnread ? 'bg-info bg-opacity-5' : ''}`}
-                style={{ 
+                style={{
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   borderLeft: isSelected ? '4px solid var(--bs-primary)!important' : 'none'
@@ -322,9 +322,9 @@ const Sidebar = () => {
                     </span>
                     <span>
                       <i className="fas fa-calendar-alt me-1"></i>
-                      {user.datecreated ? new Date(user.datecreated).toLocaleDateString('en-IN', { 
-                        day: '2-digit', 
-                        month: 'short' 
+                      {user.datecreated ? new Date(user.datecreated).toLocaleDateString('en-IN', {
+                        day: '2-digit',
+                        month: 'short'
                       }) : 'N/A'}
                     </span>
                     {user.profession && (
